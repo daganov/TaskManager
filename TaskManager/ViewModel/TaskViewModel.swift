@@ -36,6 +36,7 @@ class TaskViewModel: ObservableObject {
             let calendar = Calendar.current
             
             let filtered = self.storedTasks.filter { calendar.isDate($0.taskDate, inSameDayAs: self.currentDay) }
+                .sorted { $0.taskDate > $1.taskDate }
             
             DispatchQueue.main.async {
                 withAnimation {
@@ -74,5 +75,14 @@ class TaskViewModel: ObservableObject {
     // MARK: Checking if current date is today
     func isToday(date: Date) -> Bool {
         Calendar.current.isDate(date, inSameDayAs: currentDay)
+    }
+    
+    // MARK: Checking if currentHour is task Hour
+    func isCurrentHour(date: Date) -> Bool {
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: date)
+        let currentHour = calendar.component(.hour, from: Date())
+        
+        return hour == currentHour
     }
 }
