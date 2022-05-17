@@ -69,13 +69,111 @@ struct Home: View {
                 }
             }
         }
+        .ignoresSafeArea(.container, edges: .top)
     }
     
     // MARK: Task View
     func tasksView() -> some View {
         LazyVStack(spacing: 10) {
             
+            if let tasks = taskModel.filteredTasks {
+                if tasks.isEmpty {
+                    Text("Список задач пуст")
+                        .font(.system(size: 16))
+                        .fontWeight(.light)
+                        .offset(y: 100)
+                } else {
+                    ForEach(tasks) { taskCardView(task: $0) }
+                }
+            } else {
+                // MARK: Progress View
+                ProgressView()
+                    .offset(y: 100)
+            }
         }
+        .padding()
+        .padding(.top)
+        // MARK: Updating Tasks
+        .onChange(of: taskModel.currentDay) { newValue in
+            taskModel.filterTodayTasks()
+        }
+    }
+    
+    // MARK: Task Card View
+    func taskCardView(task: Task) -> some View {
+        HStack(alignment: .top, spacing: 30) {
+            VStack(spacing: 10) {
+                Circle()
+                    .fill(.black)
+                    .frame(width: 15, height: 15)
+                    .background {
+                        Circle()
+                            .stroke(.black, lineWidth: 1)
+                            .padding(-3)
+                    }
+                
+                Rectangle()
+                    .fill(.black)
+                    .frame(width: 3)
+            }
+            
+            VStack {
+                
+                HStack(alignment: .top, spacing: 10) {
+                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        
+                        Text(task.taskTitle)
+                            .font(.title2.bold())
+                        
+                        Text(task.taskDescription)
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                    }
+                    .hLeading()
+                    
+                    Text(task.taskDate.formatted(date: .omitted, time: .shortened))
+                }
+                
+                HStack(spacing: 0) {
+                    
+                    HStack(spacing: -10) {
+                        
+                        ForEach(1..<4) { _ in
+                            Image("Profile")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 45, height: 45)
+                                .clipShape(Circle())
+                                .background {
+                                    Circle()
+                                        .stroke(.black, lineWidth: 5)
+                                }
+                        }
+                    }
+                    .hLeading()
+                    
+                    // MARK: Check Button
+                    Button {
+                        
+                    } label: {
+                        Image(systemName: "checkmark")
+                            .foregroundStyle(.black)
+                            .padding(10)
+                            .background(Color.white, in: RoundedRectangle(cornerRadius: 10))
+                    }
+                }
+                .padding(.top)
+            }
+            .foregroundStyle(.white)
+            .padding()
+            .hLeading()
+            .background {
+                Color("AccentColor")
+                    .cornerRadius(25)
+            }
+        }
+        .hLeading()
     }
     
     // MARK: Заголовок
@@ -102,6 +200,7 @@ struct Home: View {
             }
         }
         .padding()
+        .padding(.top, getSafeArea().top)
         .background(Color.white)
     }
 }
@@ -125,6 +224,19 @@ extension View {
     
     func hCenter() -> some View {
         self.frame(maxWidth: .infinity, alignment: .center)
+    }
+    
+    // MARK: Safe Area
+    func getSafeArea() -> UIEdgeInsets {
+        guard let screen = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
+            return .zero
+        }
+        
+        guard let safeArea = screen.windows.first?.safeAreaInsets else {
+            return .zero
+        }
+        
+        return safeArea
     }
     
 }
