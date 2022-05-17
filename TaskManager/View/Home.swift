@@ -3,6 +3,7 @@ import SwiftUI
 struct Home: View {
     
     @StateObject var taskModel = TaskViewModel()
+    @Namespace var animation
     
     var body: some View {
         
@@ -32,15 +33,28 @@ struct Home: View {
                                     Circle()
                                         .fill(.white)
                                         .frame(width: 8, height: 8)
+                                        .opacity(taskModel.isToday(date: day) ? 1 : 0)
                                 }
-                                .foregroundColor(.white)
+                                // MARK: Foreground Style
+                                .foregroundStyle(taskModel.isToday(date: day) ? .primary : .secondary)
+                                .foregroundColor(taskModel.isToday(date: day) ? .white : .black)
                                 // MARK: Capsule Shape
                                 .frame(width: 45, height: 90)
                                 .background {
-                                    
                                     ZStack {
-                                        Capsule()
-                                            .fill(.black)
+                                        // MARK: Matching Geometry Effect
+                                        if taskModel.isToday(date: day) {
+                                            Capsule()
+                                                .fill(.black)
+                                                .matchedGeometryEffect(id: "CURRENTDAY", in: animation)
+                                        }
+                                    }
+                                }
+                                .contentShape(Capsule())
+                                .onTapGesture {
+                                    // Updating Current Day
+                                    withAnimation {
+                                        taskModel.currentDay = day
                                     }
                                 }
                             }
@@ -48,10 +62,19 @@ struct Home: View {
                         .padding(.horizontal)
                     }
                     
+                    tasksView()
+                    
                 } header: {
                     headerView()
                 }
             }
+        }
+    }
+    
+    // MARK: Task View
+    func tasksView() -> some View {
+        LazyVStack(spacing: 10) {
+            
         }
     }
     
