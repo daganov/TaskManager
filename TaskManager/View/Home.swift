@@ -74,7 +74,7 @@ struct Home: View {
     
     // MARK: Task View
     func tasksView() -> some View {
-        LazyVStack(spacing: 10) {
+        LazyVStack(spacing: 20) {
             
             if let tasks = taskModel.filteredTasks {
                 if tasks.isEmpty {
@@ -104,13 +104,14 @@ struct Home: View {
         HStack(alignment: .top, spacing: 30) {
             VStack(spacing: 10) {
                 Circle()
-                    .fill(.black)
+                    .fill(taskModel.isCurrentHour(date: task.taskDate) ? .black : .clear)
                     .frame(width: 15, height: 15)
                     .background {
                         Circle()
                             .stroke(.black, lineWidth: 1)
                             .padding(-3)
                     }
+                    .scaleEffect(taskModel.isCurrentHour(date: task.taskDate) ? 1 : 0.8)
                 
                 Rectangle()
                     .fill(.black)
@@ -135,42 +136,46 @@ struct Home: View {
                     Text(task.taskDate.formatted(date: .omitted, time: .shortened))
                 }
                 
-                HStack(spacing: 0) {
-                    
-                    HStack(spacing: -10) {
+                if taskModel.isCurrentHour(date: task.taskDate) {
+                    HStack(spacing: 0) {
                         
-                        ForEach(1..<4) { _ in
-                            Image("Profile")
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 45, height: 45)
-                                .clipShape(Circle())
-                                .background {
-                                    Circle()
-                                        .stroke(.black, lineWidth: 5)
-                                }
+                        HStack(spacing: -10) {
+                            
+                            ForEach(1..<4) { _ in
+                                Image("Profile")
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 45, height: 45)
+                                    .clipShape(Circle())
+                                    .background {
+                                        Circle()
+                                            .stroke(.black, lineWidth: 5)
+                                    }
+                            }
+                        }
+                        .hLeading()
+                        
+                        // MARK: Check Button
+                        Button {
+                            
+                        } label: {
+                            Image(systemName: "checkmark")
+                                .foregroundStyle(.black)
+                                .padding(10)
+                                .background(Color.white, in: RoundedRectangle(cornerRadius: 10))
                         }
                     }
-                    .hLeading()
-                    
-                    // MARK: Check Button
-                    Button {
-                        
-                    } label: {
-                        Image(systemName: "checkmark")
-                            .foregroundStyle(.black)
-                            .padding(10)
-                            .background(Color.white, in: RoundedRectangle(cornerRadius: 10))
-                    }
+                    .padding(.top)
                 }
-                .padding(.top)
             }
-            .foregroundStyle(.white)
-            .padding()
+            .foregroundStyle(taskModel.isCurrentHour(date: task.taskDate) ? .white : .black)
+            .padding(taskModel.isCurrentHour(date: task.taskDate) ? 15 : 0)
+            .padding(.bottom, taskModel.isCurrentHour(date: task.taskDate) ? 0 : 10)
             .hLeading()
             .background {
                 Color("AccentColor")
                     .cornerRadius(25)
+                    .opacity(taskModel.isCurrentHour(date: task.taskDate) ? 1 : 0)
             }
         }
         .hLeading()
